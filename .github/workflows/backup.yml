@@ -1,1 +1,34 @@
+name: Backup EFS and RDS
+
+on:
+  schedule:
+    - cron: '0 18 * * *' # Runs daily at 2 AM UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Backup EFS
+      env:
+        EFS_ID: fs-0d9a9eba270b57421 # Replace with your EFS file system ID
+      run: |
+        echo "Creating EFS backup..."
+        aws efs create-backup --file-system-id $EFS_ID
+
+    - name: Backup RDS
+      env:
+        RDS_INSTANCE_ID: database-1.cxsk46eywznu.us-east-1.rds.amazonaws.com # Replace with your RDS instance ID
+      run: |
+        echo "Creating RDS snapshot..."
+        SNAPSHOT_ID=${RDS_INSTANCE_ID}-$(date +%Y-%m-%d-%H-%M-%S)
+        aws rds create-db-snapshot --db-snapshot-identifier $SNAPSHOT_ID --db-instance-identifier $RDS_INSTANCE_ID
 
