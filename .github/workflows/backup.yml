@@ -21,4 +21,4 @@ jobs:
         aws backup start-backup-job \
           --resource-arn arn:aws:rds:${{ secrets.AWS_REGION }}:863518438036:db:database-1 \
           --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
-          --backup-vault-name efs  # Replace with the correct backup vault name for RDS
+          --backup-vault-name efs  
