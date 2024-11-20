@@ -1,33 +1,27 @@
-name: Install AWS CLI
+name: Install or Update AWS CLI
 
 on:
-  workflow_dispatch: # Allows manual trigger, or you can use `schedule` for periodic runs
+  workflow_dispatch:  # Trigger manually or schedule as needed
 
 jobs:
   install-aws-cli:
     runs-on: ubuntu-latest  # Use the latest Ubuntu runner
-    
+
     steps:
       # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Step 2: Install AWS CLI v2
-      - name: Install AWS CLI
+      # Step 2: Install or Update AWS CLI
+      - name: Install or Update AWS CLI
         run: |
-          # Download the AWS CLI v2 installation package
+          set -ex  # Enable debugging output
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          
-          # Unzip the downloaded package
           unzip awscliv2.zip
-          
-          # Install AWS CLI
-          sudo ./aws/install
-          
-          # Verify installation
-          aws --version
+          sudo ./aws/install --update  # Update the AWS CLI if already installed
+          aws --version  # Verify the AWS CLI version
 
-      # Step 3: Set up AWS credentials (if needed)
+      # Step 3: Set up AWS credentials (ensure you've added the secrets)
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -35,4 +29,5 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Add other steps here for your desired AWS operations (e.g., backup, deployments)
+      # Add other steps for your AWS operations (e.g., backups, deployments)
+
