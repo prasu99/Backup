@@ -21,13 +21,13 @@ jobs:
         aws backup start-backup-job \
           --resource-arn arn:aws:rds:${{ secrets.AWS_REGION }}:863518438036:db:database-1 \
           --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
-          --backup-vault-name efs  
-          
+          --backup-vault-name efs
+
     - name: Trigger EFS Backup using AWS Backup
       run: |
         echo "Triggering EFS backup..."
         aws backup start-backup-job \
+          --backup-plan-id <backup-plan-id>  # Replace with actual backup plan ID
           --resource-arn arn:aws:efs:${{ secrets.AWS_REGION }}:863518438036:file-system:fs-0d9a9eba270b57421 \
           --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
-          --backup-vault-name efs  # Replace with your backup vault name
-    
+          --backup-vault-name efs
