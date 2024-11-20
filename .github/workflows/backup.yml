@@ -1,9 +1,7 @@
-name: Backup EFS and RDS
+name: Manual Backup for RDS and EFS
 
 on:
-  schedule:
-    - cron: '0 18 * * *' # Runs daily at 2 AM UTC
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:  # This allows the workflow to be triggered manually
 
 jobs:
   backup:
@@ -16,25 +14,21 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
- # Step 2: Debugging Step - Print EFS and RDS values
-    - name: Debug EFS and RDS Variables
-      run: |
-        echo "EFS_ID: $EFS_ID"
-        echo "RDS_INSTANCE_ID: $RDS_INSTANCE_ID"
-        echo "AWS_REGION: ${{ secrets.AWS_REGION }}"
 
-    - name: Backup EFS
-      env:
-        EFS_ID: fs-0d9a9eba270b57421 # Replace with your EFS file system ID
+    - name: Trigger RDS Backup using AWS Backup
       run: |
-        echo "Creating EFS backup..."
-        aws efs create-backup --file-system-id $EFS_ID
+        echo "Triggering RDS backup..."
+        aws backup start-backup-job \
+          --backup-plan-id 635c8e4e-a268-40e6-9823-58e53d0b2441 \
+          --resource-arn arn:aws:rds:${{ secrets.AWS_REGION }}:863518438036:db:database-1 \
+          --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
+          --backup-job-name "RDS-Manual-Backup-$(date +%Y-%m-%d-%H-%M-%S)"
 
-    - name: Backup RDS
-      env:
-        RDS_INSTANCE_ID: database-1.cxsk46eywznu.us-east-1.rds.amazonaws.com # Replace with your RDS instance ID
+    - name: Trigger EFS Backup using AWS Backup
       run: |
-        echo "Creating RDS snapshot..."
-        SNAPSHOT_ID=${RDS_INSTANCE_ID}-$(date +%Y-%m-%d-%H-%M-%S)
-        aws rds create-db-snapshot --db-snapshot-identifier $SNAPSHOT_ID --db-instance-identifier $RDS_INSTANCE_ID
-
+        echo "Triggering EFS backup..."
+        aws backup start-backup-job \
+          --backup-plan-id 635c8e4e-a268-40e6-9823-58e53d0b2441 \
+          --resource-arn arn:aws:efs:${{ secrets.AWS_REGION }}:863518438036:file-system:fs-0d9a9eba270b57421 \
+          --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
+          --backup-job-name "EFS-Manual-Backup-$(date +%Y-%m-%d-%H-%M-%S)"
