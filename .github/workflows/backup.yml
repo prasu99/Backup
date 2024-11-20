@@ -19,18 +19,16 @@ jobs:
       run: |
         echo "Triggering RDS backup..."
         aws backup start-backup-job \
-          --backup-plan-id 635c8e4e-a268-40e6-9823-58e53d0b2441 \
           --resource-arn arn:aws:rds:${{ secrets.AWS_REGION }}:863518438036:db:database-1 \
           --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
-          --backup-job-name "RDS-Manual-Backup-$(date +%Y-%m-%d-%H-%M-%S)" \
-          --backup-vault-name efs
+          --backup-vault-name efs \
+          --backup-job-name "RDS-Manual-Backup-$(date +%Y-%m-%d-%H-%M-%S)"
 
     - name: Trigger EFS Backup using AWS Backup
       run: |
         echo "Triggering EFS backup..."
         aws backup start-backup-job \
-          --backup-plan-id 635c8e4e-a268-40e6-9823-58e53d0b2441 \
           --resource-arn arn:aws:efs:${{ secrets.AWS_REGION }}:863518438036:file-system:fs-0d9a9eba270b57421 \
           --iam-role-arn arn:aws:iam::863518438036:role/service-role/AWSBackupDefaultServiceRole \
-          --backup-job-name "EFS-Manual-Backup-$(date +%Y-%m-%d-%H-%M-%S)" \
-          --backup-vault-name efs
+          --backup-vault-name efs \
+          --backup-job-name "EFS-Manual-Backup-$(date +%Y-%m-%d-%H-%M-%S)"
